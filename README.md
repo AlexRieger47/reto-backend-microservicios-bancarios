@@ -32,6 +32,8 @@ La solucion contempla API REST, JPA, base de datos relacional, comunicacion asin
 - `BaseDatos.sql`: script relacional base para la entrega.
 - `postman/reto-backend.postman_collection.json`: coleccion de prueba manual.
 
+Nota Postman: los requests `Consultar movimiento por ID` y `Actualizar movimiento` usan la variable `{{movementId}}`. Ejecuta primero `Registrar deposito`, porque ese request guarda automaticamente el ID del movimiento creado. Si ejecutas esos requests aislados, reemplaza `{{movementId}}` por un ID real existente.
+
 ## Endpoints
 
 Customer service (`http://localhost:8081`):

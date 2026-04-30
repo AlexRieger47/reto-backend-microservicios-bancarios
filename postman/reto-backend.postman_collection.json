@@ -36,21 +36,7 @@
               "mode": "raw",
               "raw": "{\n  \"clienteId\": \"CLI-001\",\n  \"nombre\": \"Jose Lema\",\n  \"genero\": \"Masculino\",\n  \"edad\": 32,\n  \"identificacion\": \"0102030405\",\n  \"direccion\": \"Otavalo sn y principal\",\n  \"telefono\": \"0987654321\",\n  \"contrasena\": \"1234\",\n  \"estado\": true\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "if (body.id) {",
-                  "  pm.collectionVariables.set('movementId', body.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
+          }
         },
         {
           "name": "Listar clientes",
@@ -83,6 +69,7 @@
         },
         {
           "name": "Registrar deposito",
+          "description": "Ejecutar antes de consultar o actualizar movimiento. Este request guarda automaticamente `movementId` con el ID del movimiento creado.",
           "request": {
             "method": "POST",
             "header": [
@@ -96,10 +83,25 @@
               "mode": "raw",
               "raw": "{\n  \"numeroCuenta\": \"478758\",\n  \"valor\": 600\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.id) {",
+                  "  pm.collectionVariables.set('movementId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Consultar movimiento por ID",
+          "description": "Usa `{{movementId}}`, variable que se carga al ejecutar primero `Registrar deposito`. Si se ejecuta aislado, reemplazarla por un ID real existente.",
           "request": {
             "method": "GET",
             "url": "{{accountBaseUrl}}/movimientos/{{movementId}}"
@@ -107,6 +109,7 @@
         },
         {
           "name": "Actualizar movimiento",
+          "description": "Usa `{{movementId}}`, variable que se carga al ejecutar primero `Registrar deposito`. Si se ejecuta aislado, reemplazarla por un ID real existente.",
           "request": {
             "method": "PUT",
             "header": [
