@@ -5,6 +5,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   customer-db:
     image: postgres:16-alpine
@@ -17,6 +22,11 @@ services:
       - "5433:5432"
     volumes:
       - customer-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U banking -d customerdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   account-db:
     image: postgres:16-alpine
@@ -29,6 +39,11 @@ services:
       - "5434:5432"
     volumes:
       - account-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U banking -d accountdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   customer-service:
     build:
@@ -36,8 +51,10 @@ services:
       dockerfile: customer-service/Dockerfile
     container_name: banking-customer-service
     depends_on:
-      - customer-db
-      - rabbitmq
+      customer-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8081
       DB_URL: jdbc:postgresql://customer-db:5432/customerdb
@@ -48,6 +65,7 @@ services:
       RABBITMQ_HOST: rabbitmq
     ports:
       - "8081:8081"
+    restart: on-failure
 
   account-service:
     build:
@@ -55,8 +73,10 @@ services:
       dockerfile: account-service/Dockerfile
     container_name: banking-account-service
     depends_on:
-      - account-db
-      - rabbitmq
+      account-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8082
       DB_URL: jdbc:postgresql://account-db:5432/accountdb
@@ -68,6 +88,7 @@ services:
       RABBIT_LISTENERS_ENABLED: true
     ports:
       - "8082:8082"
+    restart: on-failure
 
 volumes:
   customer-db-data:
