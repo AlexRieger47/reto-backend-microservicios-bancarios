@@ -50,11 +50,22 @@ Account service (`http://localhost:8082`):
 - `PUT /cuentas/{id}`
 - `DELETE /cuentas/{id}`
 - `GET /movimientos`
+- `GET /movimientos/{id}`
 - `POST /movimientos`
+- `PUT /movimientos/{id}`
 - `DELETE /movimientos/{id}`
 - `GET /reportes?fecha=yyyy-MM-dd,yyyy-MM-dd&cliente=CLI-001`
 
-Los movimientos se registran como transacciones contables. Por integridad del saldo historico no se expone actualizacion de movimientos; si un movimiento fue errado, el flujo sano es registrar un movimiento compensatorio.
+Los movimientos recalculan el saldo disponible de la cuenta al crearse, actualizarse o eliminarse. Si un retiro supera el saldo disponible, la API retorna `Saldo no disponible`.
+
+## Swagger
+
+Con los servicios levantados, la documentacion interactiva queda disponible en:
+
+- Customer service: `http://127.0.0.1:8081/swagger-ui.html`
+- Account service: `http://127.0.0.1:8082/swagger-ui.html`
+
+En Windows con WSL en modo espejo, `127.0.0.1` suele ser mas confiable que `localhost`.
 
 ## Ejecutar en desarrollo
 
@@ -89,6 +100,12 @@ mvn test
 ```
 
 `mvn test` ejecuta unitarias, integracion y Karate. Para que Karate pueda probar los endpoints reales, `customer-service` y `account-service` deben estar levantados en `8081` y `8082`.
+
+En Windows/WSL espejo, si `localhost` da problemas, ejecuta:
+
+```powershell
+mvn test "-Dcustomer.baseUrl=http://127.0.0.1:8081" "-Daccount.baseUrl=http://127.0.0.1:8082"
+```
 
 Solo unitarias e integracion por servicio, sin Karate:
 

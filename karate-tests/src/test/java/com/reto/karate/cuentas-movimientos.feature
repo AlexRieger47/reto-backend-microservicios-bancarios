@@ -18,6 +18,20 @@ Feature: Cuentas y movimientos API
     When method post
     Then status 201
     And match response.saldo == 150
+    * def movimientoId = response.id
+
+    Given path 'movimientos', movimientoId
+    When method get
+    Then status 200
+    And match response.id == movimientoId
+    And match response.numeroCuenta == numeroCuenta
+
+    Given path 'movimientos', movimientoId
+    And request { numeroCuenta: '#(numeroCuenta)', valor: 80 }
+    When method put
+    Then status 200
+    And match response.valor == 80
+    And match response.saldo == 180
 
     Given path 'reportes'
     And param fecha = '2020-01-01,2030-12-31'
@@ -25,7 +39,7 @@ Feature: Cuentas y movimientos API
     When method get
     Then status 200
     And match response[0].cliente == 'Cliente Karate'
-    And match response[0].saldoDisponible == 150
+    And match response[0].saldoDisponible == 180
 
     Given path 'movimientos'
     And request { numeroCuenta: '#(numeroCuenta)', valor: -300 }

@@ -137,4 +137,24 @@ public class Cuenta {
         movimientos.add(movimiento);
         return movimiento;
     }
+
+    public void actualizarMovimiento(Movimiento movimiento, BigDecimal nuevoValor) {
+        BigDecimal diferencia = nuevoValor.subtract(movimiento.getValor());
+        BigDecimal nuevoSaldo = saldoDisponible.add(diferencia);
+        if (nuevoSaldo.signum() < 0) {
+            throw new InsufficientBalanceException("Saldo no disponible");
+        }
+
+        saldoDisponible = nuevoSaldo;
+        movimiento.update(nuevoValor, nuevoSaldo);
+    }
+
+    public void reversarMovimiento(Movimiento movimiento) {
+        BigDecimal nuevoSaldo = saldoDisponible.subtract(movimiento.getValor());
+        if (nuevoSaldo.signum() < 0) {
+            throw new InsufficientBalanceException("Saldo no disponible");
+        }
+
+        saldoDisponible = nuevoSaldo;
+    }
 }

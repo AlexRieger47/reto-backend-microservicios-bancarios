@@ -6,11 +6,15 @@
   "variable": [
     {
       "key": "customerBaseUrl",
-      "value": "http://localhost:8081"
+      "value": "http://127.0.0.1:8081"
     },
     {
       "key": "accountBaseUrl",
-      "value": "http://localhost:8082"
+      "value": "http://127.0.0.1:8082"
+    },
+    {
+      "key": "movementId",
+      "value": "1"
     }
   ],
   "item": [
@@ -32,7 +36,21 @@
               "mode": "raw",
               "raw": "{\n  \"clienteId\": \"CLI-001\",\n  \"nombre\": \"Jose Lema\",\n  \"genero\": \"Masculino\",\n  \"edad\": 32,\n  \"identificacion\": \"0102030405\",\n  \"direccion\": \"Otavalo sn y principal\",\n  \"telefono\": \"0987654321\",\n  \"contrasena\": \"1234\",\n  \"estado\": true\n}"
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.id) {",
+                  "  pm.collectionVariables.set('movementId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Listar clientes",
@@ -77,6 +95,30 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"numeroCuenta\": \"478758\",\n  \"valor\": 600\n}"
+            }
+          }
+        },
+        {
+          "name": "Consultar movimiento por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{accountBaseUrl}}/movimientos/{{movementId}}"
+          }
+        },
+        {
+          "name": "Actualizar movimiento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{accountBaseUrl}}/movimientos/{{movementId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"478758\",\n  \"valor\": 800\n}"
             }
           }
         },

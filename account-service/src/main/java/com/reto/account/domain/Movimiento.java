@@ -70,4 +70,10 @@ public class Movimiento {
     public Cuenta getCuenta() {
         return cuenta;
     }
+
+    public void update(BigDecimal valor, BigDecimal saldo) {
+        this.valor = valor;
+        this.saldo = saldo;
+        this.tipoMovimiento = valor.signum() >= 0 ? "Deposito" : "Retiro";
+    }
 }

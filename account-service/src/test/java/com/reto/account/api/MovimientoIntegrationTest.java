@@ -1,7 +1,8 @@
 package com.reto.account.api;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,11 +43,28 @@ class MovimientoIntegrationTest {
                         .content(objectMapper.writeValueAsString(cuenta)))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/movimientos")
+        MvcResult createdMovement = mockMvc.perform(post("/movimientos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new MovimientoRequest("225487", java.math.BigDecimal.valueOf(50)))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.saldo").value(150));
+                .andExpect(jsonPath("$.saldo").value(150))
+                .andReturn();
+
+        long movimientoId = objectMapper.readTree(createdMovement.getResponse().getContentAsString())
+                .get("id")
+                .asLong();
+
+        mockMvc.perform(get("/movimientos/{id}", movimientoId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(movimientoId))
+                .andExpect(jsonPath("$.numeroCuenta").value("225487"));
+
+        mockMvc.perform(put("/movimientos/{id}", movimientoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new MovimientoRequest("225487", java.math.BigDecimal.valueOf(80)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valor").value(80))
+                .andExpect(jsonPath("$.saldo").value(180));
 
         mockMvc.perform(post("/movimientos")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -55,9 +74,9 @@ class MovimientoIntegrationTest {
 
         mockMvc.perform(get("/reportes")
                         .param("fecha", "2026-01-01,2026-12-31")
-                        .param("cliente", "CLI-002"))
+                .param("cliente", "CLI-002"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].cliente").value("Marianela Montalvo"))
-                .andExpect(jsonPath("$[0].saldoDisponible").value(150));
+                .andExpect(jsonPath("$[0].saldoDisponible").value(180));
     }
 }

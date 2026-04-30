@@ -32,7 +32,7 @@ public class ClienteController {
     }
 
     @GetMapping("/{id}")
-    public ClienteResponse findById(@PathVariable Long id) {
+    public ClienteResponse findById(@PathVariable("id") Long id) {
         return service.findById(id);
     }
 
@@ -43,12 +43,12 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    public ClienteResponse update(@PathVariable Long id, @Valid @RequestBody ClienteRequest request) {
+    public ClienteResponse update(@PathVariable("id") Long id, @Valid @RequestBody ClienteRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

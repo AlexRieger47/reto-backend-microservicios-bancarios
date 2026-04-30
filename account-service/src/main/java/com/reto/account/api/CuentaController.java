@@ -32,7 +32,7 @@ public class CuentaController {
     }
 
     @GetMapping("/{id}")
-    public CuentaResponse findById(@PathVariable Long id) {
+    public CuentaResponse findById(@PathVariable("id") Long id) {
         return service.findById(id);
     }
 
@@ -43,12 +43,12 @@ public class CuentaController {
     }
 
     @PutMapping("/{id}")
-    public CuentaResponse update(@PathVariable Long id, @Valid @RequestBody CuentaRequest request) {
+    public CuentaResponse update(@PathVariable("id") Long id, @Valid @RequestBody CuentaRequest request) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
