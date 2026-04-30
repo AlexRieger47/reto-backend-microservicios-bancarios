@@ -28,6 +28,7 @@ La solucion contempla API REST, JPA, base de datos relacional, comunicacion asin
 - `customer-service`: CRUD de clientes/personas y publicacion de eventos.
 - `account-service`: cuentas, movimientos, validacion de saldo y reportes.
 - `karate-tests`: pruebas end-to-end con Karate.
+- `docs/TestCases.md`: matriz de pruebas automaticas y manuales.
 - `BaseDatos.sql`: script relacional base para la entrega.
 - `postman/reto-backend.postman_collection.json`: coleccion de prueba manual.
 
@@ -81,19 +82,35 @@ El Compose levanta PostgreSQL para cada servicio, RabbitMQ, `customer-service` e
 
 ## Pruebas
 
-Unitarias e integracion:
+Suite completa:
 
 ```bash
 mvn test
 ```
 
-Karate requiere los dos servicios levantados:
+`mvn test` ejecuta unitarias, integracion y Karate. Para que Karate pueda probar los endpoints reales, `customer-service` y `account-service` deben estar levantados en `8081` y `8082`.
+
+Solo unitarias e integracion por servicio, sin Karate:
 
 ```bash
-mvn -pl karate-tests test -Dskip.karate.tests=false
+mvn -pl customer-service,account-service test
+```
+
+Karate solamente:
+
+```powershell
+mvn -pl karate-tests test
+```
+
+Cuando la suite se ejecuta, Karate genera el reporte HTML en:
+
+```text
+karate-tests/target/karate-reports/karate-summary.html
 ```
 
 Nota: la documentacion de apoyo mencionaba `karate-junit5:2.0.6`, pero esa coordenada no esta publicada en Maven Central. Por eso se usa `io.karatelabs:karate-junit5:1.5.2`.
+
+Las pruebas Karate generan IDs dinamicos con `UUID`, por lo que pueden repetirse contra H2 o PostgreSQL sin colisionar por `clienteId` o `numeroCuenta`.
 
 ## Decisiones de arquitectura
 

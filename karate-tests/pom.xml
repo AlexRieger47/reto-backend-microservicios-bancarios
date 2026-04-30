@@ -12,10 +12,6 @@
 
     <artifactId>karate-tests</artifactId>
 
-    <properties>
-        <skip.karate.tests>true</skip.karate.tests>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.karatelabs</groupId>
@@ -38,9 +34,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skipTests>${skip.karate.tests}</skipTests>
-                </configuration>
             </plugin>
         </plugins>
     </build>
