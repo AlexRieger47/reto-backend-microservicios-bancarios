@@ -1,0 +1,74 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: banking-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  customer-db:
+    image: postgres:16-alpine
+    container_name: banking-customer-db
+    environment:
+      POSTGRES_DB: customerdb
+      POSTGRES_USER: banking
+      POSTGRES_PASSWORD: banking
+    ports:
+      - "5433:5432"
+    volumes:
+      - customer-db-data:/var/lib/postgresql/data
+
+  account-db:
+    image: postgres:16-alpine
+    container_name: banking-account-db
+    environment:
+      POSTGRES_DB: accountdb
+      POSTGRES_USER: banking
+      POSTGRES_PASSWORD: banking
+    ports:
+      - "5434:5432"
+    volumes:
+      - account-db-data:/var/lib/postgresql/data
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    container_name: banking-customer-service
+    depends_on:
+      - customer-db
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8081
+      DB_URL: jdbc:postgresql://customer-db:5432/customerdb
+      DB_USERNAME: banking
+      DB_PASSWORD: banking
+      DB_DRIVER: org.postgresql.Driver
+      DDL_AUTO: update
+      RABBITMQ_HOST: rabbitmq
+    ports:
+      - "8081:8081"
+
+  account-service:
+    build:
+      context: .
+      dockerfile: account-service/Dockerfile
+    container_name: banking-account-service
+    depends_on:
+      - account-db
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8082
+      DB_URL: jdbc:postgresql://account-db:5432/accountdb
+      DB_USERNAME: banking
+      DB_PASSWORD: banking
+      DB_DRIVER: org.postgresql.Driver
+      DDL_AUTO: update
+      RABBITMQ_HOST: rabbitmq
+      RABBIT_LISTENERS_ENABLED: true
+    ports:
+      - "8082:8082"
+
+volumes:
+  customer-db-data:
+  account-db-data:

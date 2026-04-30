@@ -23,6 +23,82 @@ La solucion contempla API REST, JPA, base de datos relacional, comunicacion asin
 - Karate DSL
 - Docker Compose
 
-## Estado
+## Estructura
 
-Repositorio inicial creado. La implementacion se agregara en commits incrementales para mantener trazabilidad del trabajo.
+- `customer-service`: CRUD de clientes/personas y publicacion de eventos.
+- `account-service`: cuentas, movimientos, validacion de saldo y reportes.
+- `karate-tests`: pruebas end-to-end con Karate.
+- `BaseDatos.sql`: script relacional base para la entrega.
+- `postman/reto-backend.postman_collection.json`: coleccion de prueba manual.
+
+## Endpoints
+
+Customer service (`http://localhost:8081`):
+
+- `GET /clientes`
+- `GET /clientes/{id}`
+- `POST /clientes`
+- `PUT /clientes/{id}`
+- `DELETE /clientes/{id}`
+
+Account service (`http://localhost:8082`):
+
+- `GET /cuentas`
+- `GET /cuentas/{id}`
+- `POST /cuentas`
+- `PUT /cuentas/{id}`
+- `DELETE /cuentas/{id}`
+- `GET /movimientos`
+- `POST /movimientos`
+- `DELETE /movimientos/{id}`
+- `GET /reportes?fecha=yyyy-MM-dd,yyyy-MM-dd&cliente=CLI-001`
+
+Los movimientos se registran como transacciones contables. Por integridad del saldo historico no se expone actualizacion de movimientos; si un movimiento fue errado, el flujo sano es registrar un movimiento compensatorio.
+
+## Ejecutar en desarrollo
+
+Desde la raiz de `RepoBackend`:
+
+```bash
+mvn -pl customer-service spring-boot:run
+```
+
+En otra terminal:
+
+```bash
+mvn -pl account-service spring-boot:run
+```
+
+Por defecto los servicios usan H2 en memoria para desarrollo rapido. La integracion asincronica con RabbitMQ queda desactivada localmente para que los servicios puedan levantar sin contenedores.
+
+## Ejecutar con Docker
+
+```bash
+docker compose up --build
+```
+
+El Compose levanta PostgreSQL para cada servicio, RabbitMQ, `customer-service` en el puerto `8081` y `account-service` en el puerto `8082`.
+
+## Pruebas
+
+Unitarias e integracion:
+
+```bash
+mvn test
+```
+
+Karate requiere los dos servicios levantados:
+
+```bash
+mvn -pl karate-tests test -Dskip.karate.tests=false
+```
+
+Nota: la documentacion de apoyo mencionaba `karate-junit5:2.0.6`, pero esa coordenada no esta publicada en Maven Central. Por eso se usa `io.karatelabs:karate-junit5:1.5.2`.
+
+## Decisiones de arquitectura
+
+- Monorepo para simplificar revision y ejecucion del reto sin perder independencia por servicio.
+- Separacion por capas: `api`, `application`, `domain`, `infrastructure`.
+- Regla de saldo dentro del dominio `Cuenta`, no en el controlador.
+- Manejo centralizado de excepciones con respuestas JSON consistentes.
+- Comunicacion asincronica mediante RabbitMQ: cliente publica cambios y cuentas mantiene una replica simple.
